@@ -87,6 +87,16 @@ $router->post('/lien-he', 'ContactController', 'send');
 // Trang tìm kiếm
 $router->get('/tim-kiem', 'SearchController', 'index');
 
+// Admin Routes
+$router->get('/admin', 'AdminController', 'dashboard');
+$router->get('/admin/login', 'AdminController', 'login');
+$router->post('/admin/login', 'AdminController', 'authenticate');
+$router->get('/admin/logout', 'AdminController', 'logout');
+$router->get('/admin/forgot-password', 'AdminController', 'forgotPassword');
+$router->post('/admin/forgot-password', 'AdminController', 'sendResetLink');
+$router->get('/admin/reset-password/{token}', 'AdminController', 'resetPassword');
+$router->post('/admin/reset-password', 'AdminController', 'updatePassword');
+
 // Trang lỗi
 $router->get('/error/404', 'ErrorController', 'notFound');
 $router->get('/error/403', 'ErrorController', 'forbidden');
