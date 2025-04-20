@@ -4,7 +4,7 @@
  * File: app/controllers/TestimonialController.php
  */
 
-class TestimonialController extends Controller {
+class TestimonialController extends \App\Core\Controller {
     private $testimonialModel;
     private $serviceModel;
     

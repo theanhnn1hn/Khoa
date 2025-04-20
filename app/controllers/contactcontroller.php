@@ -4,7 +4,7 @@
  * File: app/controllers/ContactController.php
  */
 
-class ContactController extends Controller {
+class ContactController extends \App\Core\Controller {
     private $contactModel;
     private $settingModel;
     

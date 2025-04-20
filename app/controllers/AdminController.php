@@ -4,7 +4,7 @@
  * File: app/controllers/AdminController.php
  */
 
-class AdminController extends Controller {
+class AdminController extends \App\Core\Controller {
     protected $userModel;
     protected $layout = 'admin/layout';
 

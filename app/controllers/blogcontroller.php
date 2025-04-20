@@ -4,7 +4,7 @@
  * File: app/controllers/BlogController.php
  */
 
-class BlogController extends Controller {
+class BlogController extends \App\Core\Controller {
     private $blogModel;
     private $categoryModel;
     

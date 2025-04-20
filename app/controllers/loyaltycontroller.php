@@ -4,7 +4,7 @@
  * File: app/controllers/LoyaltyController.php
  */
 
-class LoyaltyController extends Controller {
+class LoyaltyController extends \App\Core\Controller {
     private $memberModel;
     
     /**

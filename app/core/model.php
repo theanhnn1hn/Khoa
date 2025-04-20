@@ -4,6 +4,8 @@
  * File: app/core/Model.php
  */
 
+namespace App\Core;
+
 abstract class Model {
     protected $db;
     protected $table;
@@ -13,7 +15,7 @@ abstract class Model {
      * Constructor - Khởi tạo kết nối đến database
      */
     public function __construct() {
-        $this->db = Database::getInstance();
+        $this->db = \App\Core\Database::getInstance();
     }
     
     /**

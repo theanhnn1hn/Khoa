@@ -5,7 +5,7 @@
  */
 
 // Định nghĩa hằng số cho đường dẫn thư mục
-define('ROOT_PATH', dirname(__DIR__));
+define('ROOT_PATH', __DIR__);
 define('APP_PATH', ROOT_PATH . '/app');
 define('PUBLIC_PATH', __DIR__);
 define('ASSETS_PATH', ROOT_PATH . '/assets');
@@ -19,24 +19,32 @@ ini_set('display_errors', 1);
 
 // Tự động load các lớp
 spl_autoload_register(function ($class) {
-    // Danh sách các thư mục chứa các lớp
-    $directories = [
-        APP_PATH . '/core/',
-        APP_PATH . '/controllers/',
-        APP_PATH . '/models/',
-        APP_PATH . '/helpers/'
-    ];
+    // Chuyển đổi namespace thành đường dẫn file
+    $prefix = 'App\\';
     
-    // Duyệt qua từng thư mục để tìm file class
-    foreach ($directories as $directory) {
-        $file = $directory . $class . '.php';
-        
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
+    // Kiểm tra xem class có bắt đầu bằng prefix không
+    if (strpos($class, $prefix) !== 0) {
+        return;
     }
+    
+    // Lấy đường dẫn tương đối (bỏ prefix App\)
+    $relative_class = substr($class, strlen($prefix));
+    
+    // Chuyển đổi namespace thành đường dẫn file - KHÔNG chuyển thành lowercase
+    $file = APP_PATH . '/' . str_replace('\\', '/', $relative_class) . '.php';
+    
+    // Nếu file tồn tại, load nó
+    if (file_exists($file)) {
+        require_once $file;
+        return;
+    }
+    
+    // Nếu không tìm thấy file
+    throw new Exception("Không thể tìm thấy class {$class} tại đường dẫn {$file}");
 });
+
+// Sử dụng namespace
+use App\Core\Router;
 
 // Tạo instance của Router
 $router = new Router();

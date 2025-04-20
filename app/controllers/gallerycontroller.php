@@ -4,7 +4,7 @@
  * File: app/controllers/GalleryController.php
  */
 
-class GalleryController extends Controller {
+class GalleryController extends \App\Core\Controller {
     private $galleryModel;
     private $serviceModel;
     

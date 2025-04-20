@@ -4,7 +4,7 @@
  * File: app/controllers/HomeController.php
  */
 
-class HomeController extends Controller {
+class HomeController extends \App\Core\Controller {
     private $serviceModel;
     private $testimonialModel;
     private $bannerModel;

@@ -4,7 +4,7 @@
  * File: app/controllers/BookingController.php
  */
 
-class BookingController extends Controller {
+class BookingController extends \App\Core\Controller {
     private $serviceModel;
     private $bookingModel;
     private $settingModel;

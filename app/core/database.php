@@ -1,8 +1,10 @@
 <?php
 /**
- * Class Database - Lớp xử lý kết nối và truy vấn database
+ * Database Class - Kết nối và thao tác với database
  * File: app/core/Database.php
  */
+
+namespace App\Core;
 
 class Database {
     private $connection;

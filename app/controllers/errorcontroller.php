@@ -4,7 +4,7 @@
  * File: app/controllers/ErrorController.php
  */
 
-class ErrorController extends Controller {
+class ErrorController extends \App\Core\Controller {
     
     /**
      * Constructor - Khởi tạo controller

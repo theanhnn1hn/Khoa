@@ -4,7 +4,7 @@
  * File: app/controllers/SearchController.php
  */
 
-class SearchController extends Controller {
+class SearchController extends \App\Core\Controller {
     private $serviceModel;
     private $blogModel;
     private $galleryModel;

@@ -4,7 +4,7 @@
  * File: app/controllers/ConsultationController.php
  */
 
-class ConsultationController extends Controller {
+class ConsultationController extends \App\Core\Controller {
     private $consultationModel;
     private $serviceModel;
     

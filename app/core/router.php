@@ -4,203 +4,111 @@
  * File: app/core/Router.php
  */
 
+namespace App\Core;
+
 class Router {
-    private $routes = [];
-    private $params = [];
-    private $notFoundHandler = null;
+    private $routes = [
+        'GET' => [],
+        'POST' => []
+    ];
+    private $notFoundHandler;
     
     /**
-     * Thêm route mới
+     * Đăng ký route GET
      */
-    public function add($route, $params = []) {
-        // Chuyển đổi route thành regular expression
-        $route = preg_replace('/\//', '\\/', $route);
-        
-        // Chuyển đổi {param} thành (?P<param>[^\/]+)
-        $route = preg_replace('/\{([a-z]+)\}/', '(?P<\1>[^\/]+)', $route);
-        
-        // Thêm ^ và $ vào đầu và cuối regex
-        $route = '/^' . $route . '$/i';
-        
-        // Thêm route vào mảng routes
-        $this->routes[$route] = $params;
+    public function get($uri, $controller, $action) {
+        $this->routes['GET'][$uri] = ['controller' => $controller, 'action' => $action];
+        return $this;
     }
     
     /**
-     * Thêm route GET
+     * Đăng ký route POST
      */
-    public function get($route, $controller, $action) {
-        $this->add($route, [
-            'controller' => $controller,
-            'action' => $action,
-            'method' => 'GET'
-        ]);
+    public function post($uri, $controller, $action) {
+        $this->routes['POST'][$uri] = ['controller' => $controller, 'action' => $action];
+        return $this;
     }
     
     /**
-     * Thêm route POST
-     */
-    public function post($route, $controller, $action) {
-        $this->add($route, [
-            'controller' => $controller,
-            'action' => $action,
-            'method' => 'POST'
-        ]);
-    }
-    
-    /**
-     * Thêm route PUT
-     */
-    public function put($route, $controller, $action) {
-        $this->add($route, [
-            'controller' => $controller,
-            'action' => $action,
-            'method' => 'PUT'
-        ]);
-    }
-    
-    /**
-     * Thêm route DELETE
-     */
-    public function delete($route, $controller, $action) {
-        $this->add($route, [
-            'controller' => $controller,
-            'action' => $action,
-            'method' => 'DELETE'
-        ]);
-    }
-    
-    /**
-     * Kiểm tra route có khớp với URL hiện tại không
-     */
-    public function match($url) {
-        // Loại bỏ query string nếu có
-        if ($pos = strpos($url, '?')) {
-            $url = substr($url, 0, $pos);
-        }
-        
-        // Loại bỏ dấu / ở cuối URL
-        $url = rtrim($url, '/');
-        
-        // Thêm / nếu URL trống
-        if ($url === '') {
-            $url = '/';
-        }
-        
-        // Kiểm tra từng route
-        foreach ($this->routes as $route => $params) {
-            if (preg_match($route, $url, $matches)) {
-                // Lấy các tham số từ URL (nếu có)
-                foreach ($matches as $key => $match) {
-                    if (is_string($key)) {
-                        $params[$key] = $match;
-                    }
-                }
-                
-                $this->params = $params;
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    /**
-     * Dispatch route
-     */
-    public function dispatch($url) {
-        if ($this->match($url)) {
-            // Kiểm tra phương thức HTTP
-            $requestMethod = $_SERVER['REQUEST_METHOD'];
-            
-            // Xử lý phương thức PUT và DELETE qua _method trong form
-            if ($requestMethod === 'POST' && isset($_POST['_method'])) {
-                $requestMethod = strtoupper($_POST['_method']);
-            }
-            
-            // Nếu route yêu cầu phương thức cụ thể, kiểm tra xem có khớp không
-            if (isset($this->params['method']) && $this->params['method'] !== $requestMethod) {
-                $this->handleMethodNotAllowed();
-                return;
-            }
-            
-            $controller = $this->params['controller'];
-            $action = $this->params['action'];
-            
-            // Kiểm tra controller có tồn tại không
-            $controllerFile = dirname(__DIR__) . "/controllers/{$controller}.php";
-            
-            if (file_exists($controllerFile)) {
-                require_once $controllerFile;
-                
-                // Khởi tạo controller
-                $controllerInstance = new $controller();
-                
-                // Kiểm tra action có tồn tại không
-                if (method_exists($controllerInstance, $action)) {
-                    // Gọi action với tham số từ URL
-                    call_user_func_array([$controllerInstance, $action], $this->params);
-                } else {
-                    throw new Exception("Action {$action} không tồn tại trong controller {$controller}");
-                }
-            } else {
-                throw new Exception("Controller {$controller} không tồn tại");
-            }
-        } else {
-            $this->handleNotFound();
-        }
-    }
-    
-    /**
-     * Thiết lập handler cho route không tìm thấy
+     * Thiết lập xử lý khi không tìm thấy route
      */
     public function setNotFoundHandler($handler) {
         $this->notFoundHandler = $handler;
     }
     
     /**
-     * Xử lý route không tìm thấy
+     * Dispatch route tương ứng với URL
      */
-    protected function handleNotFound() {
-        if ($this->notFoundHandler) {
-            call_user_func($this->notFoundHandler);
-        } else {
-            // Redirect đến trang 404 mặc định
-            header('HTTP/1.1 404 Not Found');
-            include dirname(__DIR__) . '/views/errors/404.php';
-        }
-    }
-    
-    /**
-     * Xử lý phương thức không được phép
-     */
-    protected function handleMethodNotAllowed() {
-        header('HTTP/1.1 405 Method Not Allowed');
-        include dirname(__DIR__) . '/views/errors/405.php';
-    }
-    
-    /**
-     * Lấy tất cả tham số
-     */
-    public function getParams() {
-        return $this->params;
-    }
-    
-    /**
-     * Tạo URL từ tên route và tham số
-     */
-    public function generateUrl($routeName, $params = []) {
-        if (isset($this->routes[$routeName])) {
-            $url = $routeName;
+    public function dispatch($url) {
+        // Xử lý query string
+        $url = parse_url($url, PHP_URL_PATH);
+        
+        // Lấy phương thức HTTP
+        $method = $_SERVER['REQUEST_METHOD'];
+        
+        // Kiểm tra route có tồn tại không
+        if (isset($this->routes[$method][$url])) {
+            // Lấy thông tin controller và action
+            $controller = $this->routes[$method][$url]['controller'];
+            $action = $this->routes[$method][$url]['action'];
             
-            // Thay thế các tham số trong URL
-            foreach ($params as $key => $value) {
-                $url = str_replace('{' . $key . '}', $value, $url);
+            // Thêm namespace
+            $controller = "App\\Controllers\\{$controller}";
+            
+            // Kiểm tra controller có tồn tại không
+            if (class_exists($controller)) {
+                // Tạo instance của controller
+                $controllerInstance = new $controller();
+                
+                // Kiểm tra action có tồn tại không
+                if (method_exists($controllerInstance, $action)) {
+                    // Gọi action
+                    $controllerInstance->$action();
+                    return;
+                }
             }
-            
-            return $url;
+        } else {
+            // Kiểm tra route có chứa tham số không
+            foreach ($this->routes[$method] as $route => $params) {
+                // Chuyển đổi route pattern thành regex
+                $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $route);
+                $pattern = "#^{$pattern}$#";
+                
+                // Kiểm tra URL có khớp với pattern không
+                if (preg_match($pattern, $url, $matches)) {
+                    // Lấy thông tin controller và action
+                    $controller = $params['controller'];
+                    $action = $params['action'];
+                    
+                    // Thêm namespace
+                    $controller = "App\\Controllers\\{$controller}";
+                    
+                    // Kiểm tra controller có tồn tại không
+                    if (class_exists($controller)) {
+                        // Tạo instance của controller
+                        $controllerInstance = new $controller();
+                        
+                        // Kiểm tra action có tồn tại không
+                        if (method_exists($controllerInstance, $action)) {
+                            // Loại bỏ các phần tử không phải tham số
+                            foreach ($matches as $key => $value) {
+                                if (is_int($key)) {
+                                    unset($matches[$key]);
+                                }
+                            }
+                            
+                            // Gọi action với tham số
+                            call_user_func_array([$controllerInstance, $action], $matches);
+                            return;
+                        }
+                    }
+                }
+            }
         }
         
-        return false;
+        // Nếu không tìm thấy route, gọi handler
+        if ($this->notFoundHandler) {
+            call_user_func($this->notFoundHandler);
+        }
     }
 }

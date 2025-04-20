@@ -4,7 +4,7 @@
  * File: app/controllers/AboutController.php
  */
 
-class AboutController extends Controller {
+class AboutController extends \App\Core\Controller {
     private $staffModel;
     private $testimonialModel;
     

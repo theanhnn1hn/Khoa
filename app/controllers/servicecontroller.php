@@ -4,7 +4,7 @@
  * File: app/controllers/ServiceController.php
  */
 
-class ServiceController extends Controller {
+class ServiceController extends \App\Core\Controller {
     private $serviceModel;
     private $galleryModel;
     private $testimonialModel;
